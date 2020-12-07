@@ -2,6 +2,8 @@
 
 Title is self-explanatory, right?
 
+This is a noob's attempt at Perl, feel free to burn it to the ground and let me know what tricks I can use to improve some of the solutions.
+
 ## Quickstart
 
 Run each day this way (in Linux systems with Perl installed):

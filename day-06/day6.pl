@@ -5,10 +5,11 @@ use warnings;
 use strict;
 use integer;
 
+
+# Intro.
 my $exists = my $all = my $people = 0;
 my %questions;
 
-# Intro.
 while (<STDIN>) {
     my $line = $_;
 

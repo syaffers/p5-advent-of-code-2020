@@ -6,6 +6,7 @@ use warnings;
 use strict;
 use integer;
 
+
 sub can_contain {
     ##
     # Recursive functions that does WOW 🤩!
@@ -17,7 +18,7 @@ sub can_contain {
     # ---
     #     bags (hash): hash containing the bags and what bags they can contain.
     #     current_bag (str): the current bag color being looked at.
-    #     target_bag (str): the droids you're looking for.
+    #     target_bag (str): the droid you're looking for.
     #
     # Returns
     # ---
@@ -28,12 +29,12 @@ sub can_contain {
     my $current_bag = $_[1];
     my $target_bag = $_[2];
 
-    # Success base case.
+    # If we reach our target bag, report true.
     if ($current_bag eq $target_bag) {
         return 1;
     }
 
-    # Failure base case.
+    # If we reach a leaf bag, clearly we can't reach our target bag.
     if (!defined($bags{$current_bag})) {
         return 0;
     }
@@ -60,26 +61,24 @@ sub count_inside {
     #
     # Returns
     # ---
-    #     int; the toatl number of illegally Russian doll-ed bags.
+    #     int; the total number of illegally Russian doll-ed bags.
     #
 
     my %bags = %{$_[0]};
     my $target_bag = $_[1];
-    my $sp = $_[2];
 
-    # Failure base case.
+    # Singleton bags don't contain anything.
     if (!defined($bags{$target_bag})) {
-        return 1;
+        return 0;
     }
 
-    # Recursive case.
+    # Check all sub-bags and add the count of the sub-bags plus their sub-bags
+    # and so on.
     my $count = 0;
     for my $sub_bag (@{$bags{$target_bag}}) {
-        my $a = $sub_bag->{'count'};
-        my $b = $sub_bag->{'color'};
-        print "$sp$target_bag has $a $b bags...\n";
-        $count += $sub_bag->{'count'} *
-                  count_inside(\%bags, $sub_bag->{'color'}, $sp.' ');
+        $count += $sub_bag->{'count'} +
+                  $sub_bag->{'count'} *
+                  count_inside(\%bags, $sub_bag->{'color'});
     }
     return $count;
 }
@@ -96,18 +95,18 @@ while (<STDIN>) {
     chomp($line);
     $line =~ /(.*) bags contain (.*)/;
     my $bag = $1;  # Color part.
-    my $bags_str = $2;  # Everything else.
+    my $sub_bags_str = $2;  # Everything else.
 
     # Make a hash of bags to list of bags which are dict of count and color.
-    if ($bags_str eq "no other bags.") {  # Leaf bags.
+    if ($sub_bags_str eq "no other bags.") {  # Leaf bags.
         $bags{$bag} = undef;
     } else {  # Matryoshka bags.
-        for my $bag_str (split(/, /, $bags_str)) {
+        for my $bag_str (split(/, /, $sub_bags_str)) {
             $bag_str =~ /([0-9]+) (.*) bag[s]*/;
             my %sub_bag;  # PERL!!! Y U SO NOT TUPLE-FRIENDLY!!!
             $sub_bag{'count'} = $1;
             $sub_bag{'color'} = $2;
-            push(@sub_bags, \%sub_bag);
+            push(@sub_bags, \%sub_bag);  # Push in the pointer to the hash.
         }
         $bags{$bag} = [@sub_bags];
     }
@@ -116,24 +115,15 @@ while (<STDIN>) {
 # Part 1.
 my $ways = 0;
 
-# while (my ($bag, $sub_bags) = each(%bags)) {
-#     print "$bag: ";
-#     if (defined($sub_bags)) {
-#         for my $sbag (@$sub_bags) {
-#             print $sbag->{'color'}, " ";
-#         }
-#     }
-#     print "\n";
-# }
-
+# Loop through all bags and see if it can contain `shiny gold`.
 for my $bag (keys(%bags)) {
     $ways += can_contain(\%bags, $bag, 'shiny gold') > 0;
 }
 # Decrement since we are counting the `shiny gold` bag as being able to
 # contain itself, I mean let's be real. *I* can't even contain myself.
-# print "Part 1: ", --$ways, "\n";
+print "Part 1: ", --$ways, "\n";
 
 
-# # Part 2.
-my $count = count_inside(\%bags, 'shiny gold', '');
+# Part 2.
+my $count = count_inside(\%bags, 'shiny gold');
 print "Part 2: $count\n";

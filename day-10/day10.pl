@@ -4,7 +4,43 @@
 use warnings;
 use strict;
 use integer;
-use List::Util qw(sum min max);
+use Memoize;
+
+memoize('count_paths');
+
+sub count_paths {
+    ##
+    # Recursive path counter. Where's Dom Cobb at?
+    #
+    # If we reach the target adapter, there has to be one path from the source
+    # adapter. Otherwise, we add up the possible paths to the target from each
+    # adapter that is compatible with the current adapter.
+    #
+    # Args
+    # ---
+    #     adapters (hash): hash of adapters and their compatible adapters from
+    #         the original set of adapters.
+    #     source (int): the joltage of the current adapter.
+    #     target (int): the joltage of the target adapter.
+    #
+    # Returns
+    # ---
+    #     int: number of paths from the source adapter to the target adapter.
+    #
+
+    my %adapters = %{$_[0]};
+    my ($source, $target) = @_[1..2];
+
+    if ($source == $target) {
+        return 1;
+    }
+
+    my $count = 0;
+    for my $next (@{$adapters{$source}}) {
+        $count += count_paths(\%adapters, $next, $target);
+    }
+    return $count;
+}
 
 
 # Intro.
@@ -20,7 +56,7 @@ while (<STDIN>) {
 # Part 1.
 my @sorted = sort {$a <=> $b} @adapters;
 
-# Add our device's and socket's joltage.
+# Add our device's joltage and socket's joltage.
 push(@sorted, $sorted[-1] + 3);
 unshift(@sorted, 0);
 my %counter = (1 => 0, 3 => 0);
@@ -33,20 +69,22 @@ for my $i (1..scalar(@sorted)-1) {
 my $output = $counter{3} * $counter{1};
 print "Part 1: $output\n";
 
-# # Part 2.
-# my $exit = 0;
+# Part 2.
+# Create a traversal graph for adapters.
+my %graph;
 
-# # Idk, 100 seems like a big enough number to sum up, I'll increase if needed.
-# # *SPOILER*: I didn't need to.
-# for my $i (2..100) {
-#     # Basically sliding window of size i.
-#     for my $j (0..scalar(@numbers)-$i) {
-#         my @sub = @numbers[$j..$j+$i-1];
-#         if (sum(@sub) == $invalid) {
-#             print "Part 2: ", min(@sub) + max(@sub), "\n";
-#             $exit++;
-#             last;
-#         }
-#     }
-#     last if $exit;
-# }
+for my $adapter (@sorted) {
+    my @nexts = ();
+    for my $next ($adapter+1..$adapter+3) {
+        if ($next ~~ @sorted) {
+            push(@nexts, $next);
+        }
+    }
+    $graph{$adapter} = [@nexts];
+}
+
+# The number of ways you can combine adapters is equal to the number of
+# possible adapters you can pick at the current point in time and their
+# combination of adapters and so on until you get to your device.
+my $ways = count_paths(\%graph, 0, $sorted[-1]);
+print "Part 2: $ways\n";

@@ -96,7 +96,10 @@ for my $i (0..scalar(@others)-1) {
 my %mapping;
 my $threshold = sum(map {1 - $_} @error_lines);
 
+<<<<<<< HEAD
 # Repeat until we get all fields mapped to a column.
+=======
+>>>>>>> 7018d5aaaa996a8ba879b693f8e7208abcc8c511
 while (scalar(keys(%mapping)) < $n_fields) {
     my $target_field;
     my $target_column;
@@ -129,11 +132,18 @@ while (scalar(keys(%mapping)) < $n_fields) {
             }
         }
 
+<<<<<<< HEAD
         # The x-factor has to equal 1 if there is only one (and only one) field
         # that works with every row of a column. When we get this, save the
         # mapping and remove the field from the @fields list and remove the
         # column from the %columns hash. Bascially: the process of elimination
         # in program form.
+=======
+        # The x-factor has to equal 1 if there is only one field that works
+        # works with every row of a column. When we get this, save the mapping
+        # and remove the field from the @fields list and remove the column from
+        # the %columns hash.
+>>>>>>> 7018d5aaaa996a8ba879b693f8e7208abcc8c511
         if ($xfactor == 1) {
             # Add mapping.
             $mapping{$target_field} = $target_column;

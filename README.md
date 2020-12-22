@@ -1,4 +1,4 @@
-# Advent of Code 2020 in Perl
+# Advent of Code 2020 in Perl 🐫
 
 Title is self-explanatory, right? For more info, see https://adventofcode.com/2020.
 

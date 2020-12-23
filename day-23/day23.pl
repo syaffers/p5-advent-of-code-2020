@@ -27,42 +27,29 @@ sub print_list {
 }
 
 sub crotate2 {
-    my %cups = %{$_[0]};
-    my $n = $_[1];
-    my $m = max(keys(%cups));
+    my ($cups, $n, $m) = @_;
 
     # Form the hold list, and get the starting and ending position of the hold
     # part.
-    my $hold_start = $cups{$n};
-    my $c = $hold_start;
-    my @hold;
-    push(@hold, $hold_start);
-    for (1..2) {
-        $c = $cups{$c};
-        push(@hold, $c);
-    }
-    my $hold_end = $c;
-    my $remainder_start = $cups{$hold_end};
+    my $hold_start = $cups->{$n};
+    my $hold_middle = $cups->{$hold_start};
+    my $hold_end = $cups->{$hold_middle};
+    my $remainder_start = $cups->{$hold_end};
 
     # Determine the destination, do not accept if it's in the hold list.
-    my $destination = undef;
-    my $d = ($n-1) % ($m+1);
-    while (!defined($destination)) {
-        $d = $m if $d == 0;
-        if (!($d ~~ @hold)) {
-            $destination = $d;
-            last;
-        }
-        --$d;
-    }
-    my $destination_end = $cups{$destination};
+    my $destination = $n;
+    do {
+        $destination--;
+        $destination = $m if $destination <= 0;
+    } while ($destination == $hold_start or
+             $destination == $hold_middle or
+             $destination == $hold_end);
+    my $destination_end = $cups->{$destination};
 
     # Re-point things.
-    $cups{$n} = $remainder_start;
-    $cups{$destination} = $hold_start;
-    $cups{$hold_end} = $destination_end;
-
-    return \%cups;
+    $cups->{$n} = $remainder_start;
+    $cups->{$destination} = $hold_start;
+    $cups->{$hold_end} = $destination_end;
 }
 
 
@@ -81,24 +68,26 @@ while (<STDIN>) {
 # Create linked list.
 my %cupsl;
 for my $i (1..scalar(@cups)-1) {
-    $cupsl{$cups[$i-1]} = int($cups[$i]);
+    $cupsl{int($cups[$i-1])} = int($cups[$i]);
 }
-$cupsl{$cups[scalar(@cups)-1]} = int($cups[0]);
+$cupsl{int($cups[scalar(@cups)-1])} = int($cups[0]);
 
 
 ##
 # Part 1.
 #
 my $n = first {$_} @cups;
+my $m = max(@cups);
+my $r_cupsl = \%cupsl;
 for (1..100) {
-    %cupsl = %{crotate2(\%cupsl, $n)};
-    $n = $cupsl{$n};
+    crotate2($r_cupsl, $n, $m);
+    $n = $r_cupsl->{$n};
 }
 
 my $output = '';
 $n = 1;
 while (1) {
-    $n = $cupsl{$n};
+    $n = $r_cupsl->{$n};
     last if $n == 1;
     $output .= "$n";
 }
@@ -117,16 +106,19 @@ for my $i (10..1_000_000) {
 # Recreate the linked list.
 undef %cupsl;
 for my $i (1..scalar(@cups)-1) {
-    $cupsl{$cups[$i-1]} = int($cups[$i]);
+    $cupsl{int($cups[$i-1])} = int($cups[$i]);
 }
-$cupsl{$cups[scalar(@cups)-1]} = int($cups[0]);
+$cupsl{int($cups[scalar(@cups)-1])} = int($cups[0]);
 
 # Loop for 10M iterations.
 $n = first {$_} @cups;
+$n = max(@cups);
+$r_cupsl = \%cupsl;
 for my $i (1..10_000_000) {
-    say "$i";
-    %cupsl = %{crotate2(\%cupsl, $n)};
-    $n = $cupsl{$n};
+    crotate2($r_cupsl, $n, $m);
+    $n = $r_cupsl->{$n};
 }
 
-# say "Part 2: @cups";
+my $a = $r_cupsl->{1};
+my $b = $r_cupsl->{$a};
+say "Part 2: $a x $b = " . ($a * $b);

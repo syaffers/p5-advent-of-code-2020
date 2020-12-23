@@ -5,35 +5,38 @@
 #
 use warnings;
 use strict;
-use List::Util qw(max first);
+use List::Util qw(max);
 
 
 sub say {
     print "@_\n";
 }
 
-sub print_list {
-    my %ll = %{$_[0]};
-    my $s = $_[1];
-    my $c = $s;
-
-    print '[';
-    do {
-        print "$c";
-        $c = $ll{$c};
-        print ', ' if !($c eq $s);
-    } while (!($c eq $s));
-    say ']';
-}
-
-sub crotate2 {
+sub crotate {
+    ##
+    # The crab's cups rotation thing.
+    #
+    # Need more info? https://adventofcode.com/2020/day/23
+    #
+    # Args
+    # ---
+    #     cups (hash reference): reference to the hash containing the linked
+    #         list.
+    #     n (int): the starting cup number.
+    #     m (int): the max cup number.
+    #
+    # Returns
+    # ---
+    #     none
+    #
     my ($cups, $n, $m) = @_;
 
-    # Form the hold list, and get the starting and ending position of the hold
-    # part.
+    # Get all the numbers of cups being held.
     my $hold_start = $cups->{$n};
     my $hold_middle = $cups->{$hold_start};
     my $hold_end = $cups->{$hold_middle};
+
+    # Get the pointer to whatever is after the held cups.
     my $remainder_start = $cups->{$hold_end};
 
     # Determine the destination, do not accept if it's in the hold list.
@@ -76,11 +79,11 @@ $cupsl{int($cups[scalar(@cups)-1])} = int($cups[0]);
 ##
 # Part 1.
 #
-my $n = first {$_} @cups;
+my $n = int($cups[0]);
 my $m = max(@cups);
 my $r_cupsl = \%cupsl;
 for (1..100) {
-    crotate2($r_cupsl, $n, $m);
+    crotate($r_cupsl, $n, $m);
     $n = $r_cupsl->{$n};
 }
 
@@ -98,27 +101,29 @@ say "Part 1: $output";
 ##
 # Part 2.
 #
-# Fill the list.
-for my $i (10..1_000_000) {
-    push(@cups, $i);
-}
-
 # Recreate the linked list.
 undef %cupsl;
 for my $i (1..scalar(@cups)-1) {
     $cupsl{int($cups[$i-1])} = int($cups[$i]);
 }
-$cupsl{int($cups[scalar(@cups)-1])} = int($cups[0]);
+
+# Fill in remainder of the list up to 1M.
+$n = int($cups[-1]);
+for my $i (10..1_000_000) {
+    $cupsl{$n} = $i;
+    $n = $i;
+}
+$cupsl{1_000_000} = int($cups[0]);
 
 # Loop for 10M iterations.
-$n = first {$_} @cups;
-$n = max(@cups);
+$n = int($cups[0]);
+$m = 1_000_000;
 $r_cupsl = \%cupsl;
 for my $i (1..10_000_000) {
-    crotate2($r_cupsl, $n, $m);
+    crotate($r_cupsl, $n, $m);
     $n = $r_cupsl->{$n};
 }
 
 my $a = $r_cupsl->{1};
 my $b = $r_cupsl->{$a};
-say "Part 2: $a x $b = " . ($a * $b);
+say "Part 2: " . ($a * $b);

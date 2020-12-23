@@ -68,6 +68,10 @@ while (<STDIN>) {
     @cups = split(//, $line);
 }
 
+
+##
+# Part 1.
+#
 # Create linked list.
 my %cupsl;
 for my $i (1..scalar(@cups)-1) {
@@ -75,10 +79,7 @@ for my $i (1..scalar(@cups)-1) {
 }
 $cupsl{int($cups[scalar(@cups)-1])} = int($cups[0]);
 
-
-##
-# Part 1.
-#
+# Loop 100 times.
 my $n = int($cups[0]);
 my $m = max(@cups);
 my $r_cupsl = \%cupsl;
@@ -87,6 +88,7 @@ for (1..100) {
     $n = $r_cupsl->{$n};
 }
 
+# Print starting from 1 but exluding it.
 my $output = '';
 $n = 1;
 while (1) {

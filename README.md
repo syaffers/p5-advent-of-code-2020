@@ -13,6 +13,12 @@ Run each day this way (in Linux systems with Perl installed):
 ./day-XX/dayY.pl < ./day-XX/input
 ```
 
+Outputs are displayed on different lines as
+```
+Part 1: ############
+Part 2: ############
+```
+
 ### About the files
 
 All the `.pl` files are the code. Capisce? But also, you will see files like `input`, `test`, or `aux`. Here's what they mean:

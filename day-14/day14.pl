@@ -147,4 +147,4 @@ for my $line (@program) {
     }
 }
 
-print "Part 2:", sum(values(%memory)), "\n";
+print "Part 2: ", sum(values(%memory)), "\n";
